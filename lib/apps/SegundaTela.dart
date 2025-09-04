@@ -11,46 +11,116 @@ class SegundaTela extends StatefulWidget {
 }
 
 class _SegundaTelaState extends State<SegundaTela> {
-  final _value1 = TextEditingController();
-  final _value2 = TextEditingController();
+  String display = "0";
+  String previousNumber = "";
+  String operation = "";
+  bool waitingForOperand = false;
 
-  double result = 0;
-
-  void sum() {
+  void inputNumber(String number) {
     setState(() {
-      result = (double.tryParse(_value1.text) ?? 0.0) +
-          (double.tryParse(_value2.text) ?? 0.0);
-    });
-  }
-
-  void sub() {
-    setState(() {
-      result = (double.tryParse(_value1.text) ?? 0.0) -
-          (double.tryParse(_value2.text) ?? 0.0);
-    });
-  }
-
-  void div() {
-    setState(() {
-      final num2 = double.tryParse(_value2.text) ?? 0.0;
-      if (num2 != 0) {
-        result = (double.tryParse(_value1.text) ?? 0.0) / num2;
+      if (waitingForOperand) {
+        display = number;
+        waitingForOperand = false;
       } else {
-        result = double.nan;
+        display = display == "0" ? number : display + number;
       }
     });
   }
 
-  void mult() {
+  void inputOperation(String nextOperation) {
     setState(() {
-      result = (double.tryParse(_value1.text) ?? 0.0) *
-          (double.tryParse(_value2.text) ?? 0.0);
+      if (previousNumber.isEmpty) {
+        previousNumber = display;
+      } else if (!waitingForOperand) {
+        calculate();
+      }
+
+      waitingForOperand = true;
+      operation = nextOperation;
     });
+  }
+
+  void calculate() {
+    double prev = double.tryParse(previousNumber) ?? 0;
+    double current = double.tryParse(display) ?? 0;
+    double result = 0;
+
+    switch (operation) {
+      case "+":
+        result = prev + current;
+        break;
+      case "-":
+        result = prev - current;
+        break;
+      case "×":
+        result = prev * current;
+        break;
+      case "÷":
+        result = current != 0 ? prev / current : 0;
+        break;
+    }
+
+    setState(() {
+      display = result % 1 == 0 ? result.toInt().toString() : result.toString();
+      previousNumber = "";
+      operation = "";
+      waitingForOperand = true;
+    });
+  }
+
+  void clear() {
+    setState(() {
+      display = "0";
+      previousNumber = "";
+      operation = "";
+      waitingForOperand = false;
+    });
+  }
+
+  void percentage() {
+    setState(() {
+      double value = double.tryParse(display) ?? 0;
+      display = (value / 100).toString();
+    });
+  }
+
+  Widget buildButton({
+    required String text,
+    required VoidCallback onPressed,
+    Color backgroundColor = const Color(0xFF333333),
+    Color textColor = Colors.white,
+    bool isWide = false,
+  }) {
+    return Container(
+      width: isWide ? 160 : 70,
+      height: 70,
+      margin: const EdgeInsets.all(5),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(35),
+          ),
+          elevation: 0,
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 24,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
+      resizeToAvoidBottomInset: true,
       drawer: Drawer(
         child: ListView(
           children: [
@@ -82,7 +152,7 @@ class _SegundaTelaState extends State<SegundaTela> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                    const Infotela(title: "Calculadora"),
+                    const Infotela(title: "Tela de Informação"),
                   ),
                 );
               },
@@ -100,97 +170,121 @@ class _SegundaTelaState extends State<SegundaTela> {
           ],
         ),
       ),
-
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        backgroundColor: Colors.black,
+        title: Text(
+          widget.title,
+          style: const TextStyle(color: Colors.white),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+      body: SafeArea(
+        child: SingleChildScrollView(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              // Valor 1
-              TextFormField(
-                controller: _value1,
-                decoration: const InputDecoration(
-                  hintText: "First number",
-                  icon: Icon(Icons.numbers, color: Colors.lightBlueAccent),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 10),
-
-              // Valor 2
-              TextFormField(
-                controller: _value2,
-                decoration: const InputDecoration(
-                  hintText: "Second number",
-                  icon: Icon(Icons.numbers, color: Colors.lightBlueAccent),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 20),
-
-              // Linha 1 - Soma e Divisão
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: sum,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlueAccent),
-                    child: const Text(
-                      "Sum",
-                      style: TextStyle(color: Colors.black, fontSize: 18),
-                    ),
+            children: [
+              // Display
+              Container(
+                alignment: Alignment.bottomRight,
+                padding: const EdgeInsets.all(20),
+                height: 150,
+                child: Text(
+                  display,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 64,
+                    fontWeight: FontWeight.w300,
                   ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: div,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlueAccent),
-                    child: const Text(
-                      "Divide",
-                      style: TextStyle(color: Colors.black, fontSize: 18),
-                    ),
+                  textAlign: TextAlign.right,
+                ),
+              ),
+
+
+              Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildButton(
+                        text: "AC",
+                        onPressed: clear,
+                        backgroundColor: const Color(0xFFA6A6A6),
+                        textColor: Colors.black,
+                      ),
+                      buildButton(
+                        text: "%",
+                        onPressed: percentage,
+                        backgroundColor: const Color(0xFFA6A6A6),
+                        textColor: Colors.black,
+                      ),
+                      buildButton(
+                        text: "÷",
+                        onPressed: () => inputOperation("÷"),
+                        backgroundColor: const Color(0xFFFF9500),
+                      ),
+                    ],
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildButton(text: "7", onPressed: () => inputNumber("7")),
+                      buildButton(text: "8", onPressed: () => inputNumber("8")),
+                      buildButton(text: "9", onPressed: () => inputNumber("9")),
+                      buildButton(
+                        text: "×",
+                        onPressed: () => inputOperation("×"),
+                        backgroundColor: const Color(0xFFFF9500),
+                      ),
+                    ],
+                  ),
+
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildButton(text: "4", onPressed: () => inputNumber("4")),
+                      buildButton(text: "5", onPressed: () => inputNumber("5")),
+                      buildButton(text: "6", onPressed: () => inputNumber("6")),
+                      buildButton(
+                        text: "-",
+                        onPressed: () => inputOperation("-"),
+                        backgroundColor: const Color(0xFFFF9500),
+                      ),
+                    ],
+                  ),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildButton(text: "1", onPressed: () => inputNumber("1")),
+                      buildButton(text: "2", onPressed: () => inputNumber("2")),
+                      buildButton(text: "3", onPressed: () => inputNumber("3")),
+                      buildButton(
+                        text: "+",
+                        onPressed: () => inputOperation("+"),
+                        backgroundColor: const Color(0xFFFF9500),
+                      ),
+                    ],
+                  ),
+
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      buildButton(
+                        text: "0",
+                        onPressed: () => inputNumber("0"),
+                        isWide: true,
+                      ),
+                      buildButton(text: ".", onPressed: () => inputNumber(".")),
+                      buildButton(
+                        text: "=",
+                        onPressed: calculate,
+                        backgroundColor: const Color(0xFFFF9500),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-              const SizedBox(height: 10),
-
-              // Linha 2 - Subtração e Multiplicação
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: sub,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlueAccent),
-                    child: const Text(
-                      "Subtract",
-                      style: TextStyle(color: Colors.black, fontSize: 18),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: mult,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlueAccent),
-                    child: const Text(
-                      "Multiply",
-                      style: TextStyle(color: Colors.black, fontSize: 18),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Resultado
-              Text(
-                "Resultado: $result",
-                style: const TextStyle(color: Colors.red, fontSize: 28),
               ),
             ],
           ),

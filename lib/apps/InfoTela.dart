@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'SegundaTela.dart'; // Import da tela da calculadora
+import 'SegundaTela.dart';
+import 'HomeTela.dart';
 
 class Infotela extends StatefulWidget {
   const Infotela({super.key, required this.title});
@@ -26,6 +27,18 @@ class _InfoTelaState extends State<Infotela> {
                 'Menu',
                 style: TextStyle(color: Colors.white, fontSize: 20),
               ),
+            ),
+            ListTile(
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                    const HomeTela(title: "Tela de Login"),
+                  ),
+                );
+              },
             ),
             ListTile(
               title: const Text('Calculadora'),
@@ -61,6 +74,12 @@ class _InfoTelaState extends State<Infotela> {
               style: TextStyle(fontSize: 24),
             ),
             SizedBox(height: 20),
+            Image(
+              image: AssetImage('/angola.jpg'),
+              width: 300,
+              height: 300,
+              fit: BoxFit.cover,
+            ),
           ],
         ),
       ),

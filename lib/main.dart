@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const MyHomePage(title: 'Tela de Login'),
         '/home': (context) => const HomeTela(title: '',),
-        '/info': (context) => const Infotela(title: ''),
+        '/info': (context) => const Infotela(title: 'Info Tela'),
       },
     );
   }

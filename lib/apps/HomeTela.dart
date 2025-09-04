@@ -40,7 +40,7 @@ class HomeTela extends StatelessWidget {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                    const Infotela(title: "Calculadora"),
+                    const Infotela(title: "Tela de Informação"),
                   ),
                 );
               },
